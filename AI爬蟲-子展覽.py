@@ -17,7 +17,7 @@ config.read('config.ini')
 genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-url='https://tpe-mommybaby.kje-event.com.tw/ticket/?_=66ea7888e08fd0e0405c241a&utm_source=2024_1220_mombaby_KJE&utm_medium=0801_KJEedium=1024_KJE'
+url='https://vegetable.kje-event.com.tw/'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
 service=Service(path)
 chrome_options = Options()
@@ -61,12 +61,16 @@ if result['companys']!='':
     print('抓取廠商列表')
     prompt1=f"""
         {soup}
-        是廠商列表的HTML，請找到各個廠商名稱、攤位號碼，若沒有請回傳空字串，並將結果以json格式輸出，例如：
+        是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、基本資訊、廠商官方連結(若是相對網址請加上{companys})，若沒有請回傳空字串，並將結果以json格式輸出，例如：
         {{'companys': [
         {{'name': '廠商名稱',
-        'id': '攤位號碼'}},
+        'id': '攤位號碼',
+        'info': '基本資訊',
+        'url': '廠商官方連結'}},
         {{'name': '廠商名稱',
-        'id': '攤位號碼'}},
+        'id': '攤位號碼',
+        'info': '基本資訊',
+        'url': '廠商官方連結'}},
         ...
         ]}}
         """

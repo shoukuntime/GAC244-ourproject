@@ -1,0 +1,404 @@
+{
+    "companys": [
+        {
+            "name": "春天素食",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=371"
+        },
+        {
+            "name": "味丹隨緣",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=466"
+        },
+        {
+            "name": "京工蔬菜湯養生館",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=429"
+        },
+        {
+            "name": "龍口食品企業股份有限公司",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=454"
+        },
+        {
+            "name": "同心生物科技股份有限公司",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=409"
+        },
+        {
+            "name": "弘基科技-TAZCO達自康",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=408"
+        },
+        {
+            "name": "華秝工廠 茶油故事館",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=398"
+        },
+        {
+            "name": "米多益阿育吠陀進口商",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=396"
+        },
+        {
+            "name": "豐滿生技精緻農場",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=393"
+        },
+        {
+            "name": "喜馬拉雅",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=391"
+        },
+        {
+            "name": "新力康國際有限公司",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=389"
+        },
+        {
+            "name": "三葉健康概念養生鍋",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=385"
+        },
+        {
+            "name": "梅山茶油",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=382"
+        },
+        {
+            "name": "玉山酒莊",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=376"
+        },
+        {
+            "name": "佳饌股份有限公司",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=369"
+        },
+        {
+            "name": "天香堂",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=365"
+        },
+        {
+            "name": "集慧",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=520"
+        },
+        {
+            "name": "52tea 舞二茗茶",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=519"
+        },
+        {
+            "name": "東邑茶園",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=518"
+        },
+        {
+            "name": "東大製茶廠",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=517"
+        },
+        {
+            "name": "連發茶業",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=516"
+        },
+        {
+            "name": "茶悅杉林",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=515"
+        },
+        {
+            "name": "東邑",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=514"
+        },
+        {
+            "name": "和平芳",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=513"
+        },
+        {
+            "name": "志昌",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=512"
+        },
+        {
+            "name": "安心小農",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=511"
+        },
+        {
+            "name": "好茶堂",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=510"
+        },
+        {
+            "name": "玉芳茗茶",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=509"
+        },
+        {
+            "name": "綠色和平基金會",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=508"
+        },
+        {
+            "name": "四季齋",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=507"
+        },
+        {
+            "name": "軒旺",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=506"
+        },
+        {
+            "name": "曼時 Chic-Taste",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=505"
+        },
+        {
+            "name": "好力肽",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=504"
+        },
+        {
+            "name": "清流印加果",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=503"
+        },
+        {
+            "name": "保證責任南投縣可可生產合作社",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=502"
+        },
+        {
+            "name": "潮麻包",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=501"
+        },
+        {
+            "name": "馬友友印度廚房 Mayur Indian Kitchen",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=500"
+        },
+        {
+            "name": "佛大好物",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=499"
+        },
+        {
+            "name": "柏克",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=498"
+        },
+        {
+            "name": "巨國",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=497"
+        },
+        {
+            "name": "陽明生醫",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=496"
+        },
+        {
+            "name": "大東山",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=495"
+        },
+        {
+            "name": "淨心園藝工坊",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=493"
+        },
+        {
+            "name": "宜芳",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=492"
+        },
+        {
+            "name": "安心小農",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=491"
+        },
+        {
+            "name": "興中瑞茗茶",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=490"
+        },
+        {
+            "name": "萬喀隆品茶屋(WnKeLong Tea)",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=489"
+        },
+        {
+            "name": "瑋祿茶業",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=488"
+        },
+        {
+            "name": "茶院子",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=487"
+        },
+        {
+            "name": "茗順茗茶",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=486"
+        },
+        {
+            "name": "原昌茶業",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=485"
+        },
+        {
+            "name": "春勇茶王",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=484"
+        },
+        {
+            "name": "尚昕茶業",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=483"
+        },
+        {
+            "name": "依然茶葉",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=482"
+        },
+        {
+            "name": "永德茶廠",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=481"
+        },
+        {
+            "name": "原茶園 Original Tea Garden",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=480"
+        },
+        {
+            "name": "農七十生物科技有限公司",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=479"
+        },
+        {
+            "name": "國立宜蘭大學創新育成中心",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=478"
+        },
+        {
+            "name": "果子樹",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=464"
+        },
+        {
+            "name": "大盈企業社-諾麗果茶",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=450"
+        },
+        {
+            "name": "維盛發",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=443"
+        },
+        {
+            "name": "華登康美(容記)",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=435"
+        },
+        {
+            "name": "台灣邦妮",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=433"
+        },
+        {
+            "name": "正三圓",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=426"
+        },
+        {
+            "name": "如意生技",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=424"
+        },
+        {
+            "name": "亞麻幸福之家",
+            "id": "",
+            "info": "",
+            "url": "https://vegetable.kje-event.com.tw/brand/ins.php?index_id=420"
+        }
+    ],
+    "map": [
+        "",
+        ""
+    ]
+}
