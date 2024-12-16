@@ -38,7 +38,7 @@ def promt_to_json(prompt):
     return result
 
 prompt=f"""
-    以下是展覽網站的HTML，請提取以下資訊的連結(若是相對網址請加上{url})，若都沒有請回傳空字串：
+    以下是展覽網站的HTML{soup}，請提取以下資訊的連結(若是相對網址請加上{url})，若都沒有請回傳空字串：
     1. 參展的廠商列表(參展品牌/參展商列表)
     2. 展覽平面圖(非google地圖)(若連結有'map'優先選擇)
 
@@ -47,11 +47,11 @@ prompt=f"""
     'map': '展覽平面圖連結'}}
 
     HTML：
-    {soup.text[:4000]}
+    {soup}
     """
 
 result=promt_to_json(prompt)
-
+print(result)
 if result['companys']!='':
     #抓取廠商列表
     companys=result['companys']
@@ -60,7 +60,7 @@ if result['companys']!='':
     soup=BeautifulSoup(html,'lxml')
     print('抓取廠商列表')
     prompt1=f"""
-        {soup.text[:4000]}
+        {soup}
         是廠商列表的HTML，請找到各個廠商名稱、攤位號碼，若沒有請回傳空字串，並將結果以json格式輸出，例如：
         {{'companys': [
         {{'name': '廠商名稱',
