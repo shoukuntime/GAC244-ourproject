@@ -15,7 +15,14 @@ config.read('config.ini')
 
 # 設定 Google Generative AI
 genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel(
+    model_name='gemini-2.0-flash-exp',
+    generation_config={
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 40,
+        "max_output_tokens": 8192,
+    },)
 
 url='https://www.tainex.com.tw/'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
@@ -45,7 +52,7 @@ prompt=f"""
     4. 展覽網址
 
     如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。
-    請去除所有分號';'，並將結果以 JSON 格式輸出，例如：
+    請去除所有分號';'，並將結果以 JSON 格式輸出，請依照以下格式輸出：
     {{'exhibitions': [
         {{
             "name": "展覽名稱",
@@ -64,8 +71,8 @@ result=promt_to_json(prompt)
 
 prompt1=f"""
     {result}
-    請你為此json檔中的url相似度做評分，0為完全不相似，1為完全相似，
-    並將評分結果以json格式輸出，例如：
+    請你為此json檔中的所有url相似度做評分，0為完全不相似，1為完全相似，
+    並將評分結果以json格式輸出，請依照以下格式輸出：
     {{
         "score": 0.9
     }}
@@ -80,8 +87,9 @@ prompt1=f"""
         "http://www.energytaiwan.com.tw",
         "http://ohstudy.net",...]時的相似度大約為0.05
     """
-
-score=promt_to_json(prompt1)['score']
+r=promt_to_json(prompt1)
+print(r)
+score=float(r['score'])
 print(f'相似度評分為{score}')
 if score>0.75:
     print('爬找第二層')
@@ -94,7 +102,7 @@ if score>0.75:
         html=chrome.page_source
         soup=BeautifulSoup(html,'lxml')
         prompt2=f"""
-        {soup}是展覽網站的HTML，網站名稱為{name}，請找到官網連結，
+        {soup}是展覽網站的HTML，網站名稱為{name}，請找到官網連結(請不要選擇與{url}過於相似的網站，優先選擇關鍵字'官方網站'相關連結)，
         並將結果以json格式輸出，例如：
         {{'name': '2024 桃園聖誕婚禮市集 11/30-12/01',
         'url': 'https://www.kje.com.tw/exhibition/ins.php?index_id=236'}}

@@ -12,7 +12,7 @@ config.read('config.ini')
 
 # 設定 Google Generative AI
 genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-2.0-flash-exp')
 
 #利用geminai的模型寫一個自動抓取展覽資訊的爬蟲程式
 
