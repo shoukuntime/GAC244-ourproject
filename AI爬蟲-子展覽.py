@@ -135,10 +135,6 @@ end_total_time=time.time()
 total_time=end_total_time-start_total_time
 print(f'全部執行完畢，總共花費{round(total_time)}秒')
 result={'companys':result1,'map':[result2['map'],result['map']]}
-<<<<<<< HEAD
-=======
-print(result)
->>>>>>> f9d159f9327c6fbd990b2e6e025a85c9b537465b
 
 #將結果寫入json
 with open('result.json','w',encoding='utf-8') as f:
