@@ -15,7 +15,7 @@ config.read('config.ini')
 
 # 設定 Google Generative AI
 genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
-model = genai.GenerativeModel('gemini-2.0-flash-exp')
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 url='https://www.chanchao.com.tw/petsshow/kaohsiung/'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
@@ -82,11 +82,11 @@ if result['companys']!='':
         next_page=r['next']
         chrome.get(next_page)
         html=chrome.page_source
-        soup=BeautifulSoup(html,'lxml')
+        soup=BeautifulSoup(html,'lxml') #(連結中page代表所在頁面，不要找到比當前頁面還前面的連結)
         prompt1=f"""
             {soup}
             是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、基本資訊、廠商官方連結(若是相對網址請加上{companys})，若沒有請回傳空字串，
-            若有下一頁，請找到下一頁連結(連結中page代表所在頁面，不要找到比當前頁面還前面的連結)，若無下一頁連結請回傳空字串，並將結果以json格式輸出，例如：
+            若有下一頁，請找到下一頁連結，若無下一頁連結請回傳空字串，並將結果以json格式輸出，例如：
             {{'companys': [
             {{'name': '廠商名稱',
             'id': '攤位號碼',

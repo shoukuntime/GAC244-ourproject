@@ -16,15 +16,9 @@ config.read('config.ini')
 # 設定 Google Generative AI
 genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
 model = genai.GenerativeModel(
-    model_name='gemini-2.0-flash-exp',
-    generation_config={
-        "temperature": 1,
-        "top_p": 0.95,
-        "top_k": 40,
-        "max_output_tokens": 8192,
-    },)
+    model_name='gemini-1.5-flash',)
 
-url='https://www.tainex.com.tw/'
+url='https://www.kje.com.tw/exhibition/index.php?spec=all'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
 service=Service(path)
 chrome_options = Options()
