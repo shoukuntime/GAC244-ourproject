@@ -17,11 +17,7 @@ config.read('config.ini')
 genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
 model = genai.GenerativeModel('gemini-2.0-flash-exp')
 
-<<<<<<< HEAD
 url='https://www.chanchao.com.tw/petsshow/kaohsiung/'
-=======
-url='https://www.tibs.org.tw/'
->>>>>>> f9d159f9327c6fbd990b2e6e025a85c9b537465b
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
 service=Service(path)
 chrome_options = Options()
