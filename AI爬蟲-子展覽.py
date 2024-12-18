@@ -17,7 +17,7 @@ config.read('config.ini')
 genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
 model = genai.GenerativeModel('gemini-2.0-flash-exp')
 
-url='https://vegetable.kje-event.com.tw/'
+url='https://www.tibs.org.tw/'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
 service=Service(path)
 chrome_options = Options()
@@ -61,7 +61,8 @@ if result['companys']!='':
     print('抓取廠商列表')
     prompt1=f"""
         {soup}
-        是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、基本資訊、廠商官方連結(若是相對網址請加上{companys})，若沒有請回傳空字串，並將結果以json格式輸出，例如：
+        是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、基本資訊、廠商官方連結(若是相對網址請加上{companys})，若沒有請回傳空字串，
+        若有下一頁，請找到下一頁連結，若無下一頁連結請回傳空字串，並將結果以json格式輸出，例如：
         {{'companys': [
         {{'name': '廠商名稱',
         'id': '攤位號碼',
@@ -72,13 +73,37 @@ if result['companys']!='':
         'info': '基本資訊',
         'url': '廠商官方連結'}},
         ...
-        ]}}
+        ],'next': '下一頁連結'}}
         """
-
-    result1=promt_to_json(prompt1)
+    r=promt_to_json(prompt1)
+    result1=r['companys']
+    while r['next']!='':
+        print(r['next'])
+        next_page=r['next']
+        chrome.get(next_page)
+        html=chrome.page_source
+        soup=BeautifulSoup(html,'lxml')
+        prompt1=f"""
+            {soup}
+            是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、基本資訊、廠商官方連結(若是相對網址請加上{companys})，若沒有請回傳空字串，
+            若有下一頁，請找到下一頁連結(連結中page代表所在頁面，不要找到比當前頁面還前面的連結)，若無下一頁連結請回傳空字串，並將結果以json格式輸出，例如：
+            {{'companys': [
+            {{'name': '廠商名稱',
+            'id': '攤位號碼',
+            'info': '基本資訊',
+            'url': '廠商官方連結'}},
+            {{'name': '廠商名稱',
+            'id': '攤位號碼',
+            'info': '基本資訊',
+            'url': '廠商官方連結'}},
+            ...
+            ],'next': '下一頁連結'}}
+            """
+        r=promt_to_json(prompt1)
+        result1.extend(r['companys'])
 else:
     result1={'companys':''}
-
+print(result1) #廠商列表list
 if result['map']!='':
     prompt_test=f"""
         檢查此連結{result['map']}是否為展覽平面圖連結(.jpg/.png/.jpeg/.gif/.bmp/.svg/.webp/.pdf)，
@@ -109,9 +134,17 @@ else:
 end_total_time=time.time()
 total_time=end_total_time-start_total_time
 print(f'全部執行完畢，總共花費{round(total_time)}秒')
-result={'companys':result1['companys'],'map':[result2['map'],result['map']]}
+result={'companys':result1,'map':[result2['map'],result['map']]}
 print(result)
 
 #將結果寫入json
 with open('result.json','w',encoding='utf-8') as f:
     json.dump(result,f,ensure_ascii=False,indent=4)
+
+result_map=result['companys']
+with open("companys.csv", mode='w', newline='', encoding='utf-8') as file:
+    writer = csv.DictWriter(file, fieldnames=['name', 'id', 'info', 'url'])
+    # 寫入表頭
+    writer.writeheader()
+    # 寫入每個展覽的資料
+    writer.writerows(result_map)
