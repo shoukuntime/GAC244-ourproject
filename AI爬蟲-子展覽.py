@@ -17,7 +17,11 @@ config.read('config.ini')
 genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
 model = genai.GenerativeModel('gemini-2.0-flash-exp')
 
+<<<<<<< HEAD
 url='https://www.chanchao.com.tw/petsshow/kaohsiung/'
+=======
+url='https://www.tibs.org.tw/'
+>>>>>>> f9d159f9327c6fbd990b2e6e025a85c9b537465b
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
 service=Service(path)
 chrome_options = Options()
@@ -103,7 +107,7 @@ if result['companys']!='':
         result1.extend(r['companys'])
 else:
     result1={'companys':''}
-
+print(result1) #廠商列表list
 if result['map']!='':
     prompt_test=f"""
         檢查此連結{result['map']}是否為展覽平面圖連結(.jpg/.png/.jpeg/.gif/.bmp/.svg/.webp/.pdf)，
@@ -135,6 +139,10 @@ end_total_time=time.time()
 total_time=end_total_time-start_total_time
 print(f'全部執行完畢，總共花費{round(total_time)}秒')
 result={'companys':result1,'map':[result2['map'],result['map']]}
+<<<<<<< HEAD
+=======
+print(result)
+>>>>>>> f9d159f9327c6fbd990b2e6e025a85c9b537465b
 
 #將結果寫入json
 with open('result.json','w',encoding='utf-8') as f:
