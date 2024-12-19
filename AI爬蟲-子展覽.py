@@ -17,7 +17,7 @@ config.read('config.ini')
 genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-url='https://www.chanchao.com.tw/petsshow/kaohsiung/'
+url='https://www.chanchao.com.tw/petsshow/kaohsiungARENA/'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
 service=Service(path)
 chrome_options = Options()
@@ -61,19 +61,23 @@ if result['companys']!='':
     print('抓取廠商列表')
     prompt1=f"""
         {soup}
-        是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、基本資訊、廠商官方連結(若是相對網址請加上{companys})，若沒有請回傳空字串，
-        若有下一頁，請找到下一頁連結，若無下一頁連結請回傳空字串，並將結果以json格式輸出，例如：
+        是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、廠商類別、基本資訊、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+        請找到關鍵字'上一頁'與'下一頁'的連結，若沒有請回傳空字串，
+        並將結果以json格式輸出，請以以下格式輸出：
         {{'companys': [
         {{'name': '廠商名稱',
         'id': '攤位號碼',
+        'type': '廠商類別',
         'info': '基本資訊',
         'url': '廠商官方連結'}},
         {{'name': '廠商名稱',
         'id': '攤位號碼',
+        'type': '廠商類別',
         'info': '基本資訊',
         'url': '廠商官方連結'}},
         ...
-        ],'next': '下一頁連結'}}
+        ],'back': '上一頁連結',
+        'next': '下一頁連結'}}
         """
     r=promt_to_json(prompt1)
     result1=r['companys']
@@ -84,21 +88,25 @@ if result['companys']!='':
         html=chrome.page_source
         soup=BeautifulSoup(html,'lxml') #(連結中page代表所在頁面，不要找到比當前頁面還前面的連結)
         prompt1=f"""
-            {soup}
-            是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、基本資訊、廠商官方連結(若是相對網址請加上{companys})，若沒有請回傳空字串，
-            若有下一頁，請找到下一頁連結，若無下一頁連結請回傳空字串，並將結果以json格式輸出，例如：
-            {{'companys': [
-            {{'name': '廠商名稱',
-            'id': '攤位號碼',
-            'info': '基本資訊',
-            'url': '廠商官方連結'}},
-            {{'name': '廠商名稱',
-            'id': '攤位號碼',
-            'info': '基本資訊',
-            'url': '廠商官方連結'}},
-            ...
-            ],'next': '下一頁連結'}}
-            """
+        {soup}
+        是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、廠商類別、基本資訊、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+        請找到關鍵字'上一頁'與'下一頁'的連結，若沒有請回傳空字串，
+        並將結果以json格式輸出，請以以下格式輸出：
+        {{'companys': [
+        {{'name': '廠商名稱',
+        'id': '攤位號碼',
+        'type': '廠商類別',
+        'info': '基本資訊',
+        'url': '廠商官方連結'}},
+        {{'name': '廠商名稱',
+        'id': '攤位號碼',
+        'type': '廠商類別',
+        'info': '基本資訊',
+        'url': '廠商官方連結'}},
+        ...
+        ],'back': '上一頁連結',
+        'next': '下一頁連結'}}
+        """
         r=promt_to_json(prompt1)
         result1.extend(r['companys'])
 else:
@@ -142,7 +150,7 @@ with open('result.json','w',encoding='utf-8') as f:
 
 result_map=result['companys']
 with open("companys.csv", mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.DictWriter(file, fieldnames=['name', 'id', 'info', 'url'])
+    writer = csv.DictWriter(file, fieldnames=['name', 'id', 'type', 'info', 'url'])
     # 寫入表頭
     writer.writeheader()
     # 寫入每個展覽的資料
