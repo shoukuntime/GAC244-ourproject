@@ -7,6 +7,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 import csv
 import time
+import random
 
 start_total_time=time.time()
 # Config Parser
@@ -14,8 +15,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # 設定 Google Generative AI
-genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
-model = genai.GenerativeModel('gemini-1.5-flash')
+api_keys = config.get('Google', 'GEMINI_API_KEY').replace('\n', '').split(',')
 
 url='https://www.chanchao.com.tw/petsshow/kaohsiungARENA/'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
@@ -30,9 +30,16 @@ html=chrome.page_source
 soup=BeautifulSoup(html,'lxml')
 
 def promt_to_json(prompt):
-    response = model.generate_content(prompt, generation_config=genai.GenerationConfig(
-            response_mime_type="application/json",
-        ))
+    try:
+        genai.configure(api_key=random.choice(api_keys))
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(prompt, generation_config=genai.GenerationConfig(
+                response_mime_type="application/json",
+            ))
+    except Exception as e:
+        print(e,'等待十秒')
+        time.sleep(10)
+        return promt_to_json(prompt)
     result = response._result.candidates[0].content.parts[0].text
     result=json.loads(result)
     return result
@@ -61,16 +68,18 @@ if result['companys']!='':
     print('抓取廠商列表')
     prompt1=f"""
         {soup}
-        是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、廠商類別、基本資訊、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
-        請找到關鍵字'上一頁'與'下一頁'的連結，若沒有請回傳空字串，
+        是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+        請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
         並將結果以json格式輸出，請以以下格式輸出：
         {{'companys': [
         {{'name': '廠商名稱',
+        'logo': '廠商logo',
         'id': '攤位號碼',
         'type': '廠商類別',
         'info': '基本資訊',
         'url': '廠商官方連結'}},
         {{'name': '廠商名稱',
+        'logo': '廠商logo',
         'id': '攤位號碼',
         'type': '廠商類別',
         'info': '基本資訊',
@@ -80,25 +89,27 @@ if result['companys']!='':
         'next': '下一頁連結'}}
         """
     r=promt_to_json(prompt1)
+    print(r['next'])
     result1=r['companys']
     while r['next']!='':
-        print(r['next'])
         next_page=r['next']
         chrome.get(next_page)
         html=chrome.page_source
-        soup=BeautifulSoup(html,'lxml') #(連結中page代表所在頁面，不要找到比當前頁面還前面的連結)
+        soup=BeautifulSoup(html,'lxml')
         prompt1=f"""
         {soup}
-        是廠商列表的HTML，請找到各個廠商名稱、攤位號碼、廠商類別、基本資訊、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
-        請找到關鍵字'上一頁'與'下一頁'的連結，若沒有請回傳空字串，
+        是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+        請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
         並將結果以json格式輸出，請以以下格式輸出：
         {{'companys': [
         {{'name': '廠商名稱',
+        'logo': '廠商logo',
         'id': '攤位號碼',
         'type': '廠商類別',
         'info': '基本資訊',
         'url': '廠商官方連結'}},
         {{'name': '廠商名稱',
+        'logo': '廠商logo',
         'id': '攤位號碼',
         'type': '廠商類別',
         'info': '基本資訊',
@@ -108,10 +119,52 @@ if result['companys']!='':
         'next': '下一頁連結'}}
         """
         r=promt_to_json(prompt1)
+        print(r['next'])
         result1.extend(r['companys'])
+    prompt2=f"""
+    {result1}
+    請你為此json檔中的所有url相似度做評分，0為完全不相似，1為完全相似，
+    並將評分結果以json格式輸出，請依照以下格式輸出：
+    {{
+        "score": 0.9
+    }}
+    評分標準:
+    1. ["https://www.kje.com.tw/exhibition/ins.php?index_id=236",
+        "https://www.kje.com.tw/exhibition/ins.php?index_id=234",
+        "https://www.kje.com.tw/exhibition/ins.php?index_id=243",...]時的相似度大約為0.95
+    2. ["https://www.chanchao.com.tw/petsshow/kaohsiung/",
+        "https://www.tibs.org.tw/",
+        "https://www.chanchao.com.tw/ATLife/",...]時的相似度大約為0.5
+    3. ["https://www.tigax.com.tw/zh-tw/index.html",
+        "http://www.energytaiwan.com.tw",
+        "http://ohstudy.net",...]時的相似度大約為0.05
+    """
+    r=promt_to_json(prompt2)
+    score=float(r['score'])
+    print(f'相似度評分為{score}')
+    if score>0.75:
+        print('爬找第二層')
+        new_result1=[]
+        for company in result1:
+            name=company['name']
+            link=company['url']
+            chrome.get(link)
+            html=chrome.page_source
+            soup=BeautifulSoup(html,'lxml')
+            prompt2=f"""
+            {soup}是展覽網站的HTML，網站名稱為{name}，請找到官網連結(請不要選擇與{url}過於相似的網站，優先選擇關鍵字'官方網站'相關連結)，
+            若無連結請回傳空字串，將結果以json格式輸出，例如：
+            {{'name': '2024 桃園聖誕婚禮市集 11/30-12/01',
+            'url': 'https://www.kje.com.tw/exhibition/ins.php?index_id=236'}}
+            """
+            new_link=promt_to_json(prompt2)['url']
+            new_result1.append({'name':name,'id':company['id'],'type':company['type'],'info':company['info'],'url':new_link})
+        result1=new_result1
+
 else:
     result1={'companys':''}
-print(result1) #廠商列表list
+
+# print(result1) #廠商列表list
 if result['map']!='':
     prompt_test=f"""
         檢查此連結{result['map']}是否為展覽平面圖連結(.jpg/.png/.jpeg/.gif/.bmp/.svg/.webp/.pdf)，
@@ -133,7 +186,10 @@ if result['map']!='':
             是展覽平面圖的HTML，請找到展覽平面圖的連結，若沒有請回傳空字串，並將結果以json格式輸出，例如：
             {{'map': '展覽平面圖連結'}}
             """
-        result2=promt_to_json(prompt2)
+        try:
+            result2=promt_to_json(prompt2)
+        except:
+            result2={'map':''}
     else:
         result2={'map':result['map']}
 else:

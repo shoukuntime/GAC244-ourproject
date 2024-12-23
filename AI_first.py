@@ -5,19 +5,16 @@ import json
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-import csv
 import time
+import random
 from AI_second import AI_second
 
 start_total_time=time.time()
 # Config Parser
 config = configparser.ConfigParser()
 config.read('config.ini')
-
 # 設定 Google Generative AI
-genai.configure(api_key=config.get('Google', 'GEMINI_API_KEY'))
-model = genai.GenerativeModel(
-    model_name='gemini-1.5-flash',)
+api_keys = config.get('Google', 'GEMINI_API_KEY').replace('\n', '').split(',')
 
 url='https://www.chanchao.com.tw/expo.asp?t=C&country=TW'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
@@ -32,22 +29,30 @@ html=chrome.page_source
 soup=BeautifulSoup(html,'lxml')
 
 def promt_to_json(prompt):
-    response = model.generate_content(prompt, generation_config=genai.GenerationConfig(
-            response_mime_type="application/json",
-        ))
+    try:
+        genai.configure(api_key=random.choice(api_keys))
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(prompt, generation_config=genai.GenerationConfig(
+                response_mime_type="application/json",
+            ))
+    except Exception as e:
+        print(e,'等待十秒')
+        time.sleep(10)
+        return promt_to_json(prompt)
     result = response._result.candidates[0].content.parts[0].text
     result=json.loads(result)
     return result
 
 prompt=f"""
-    以下是展覽網站的HTML，請提取以下資訊：
+    {soup}是展覽網站的HTML，請提取以下資訊：
     1. 展覽名稱
     2. 展覽日期
     3. 展覽地點
     4. 展覽網址
 
-    如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。
-    請去除所有分號';'，並將結果以 JSON 格式輸出，請依照以下格式輸出：
+    如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。請去除所有分號';'，
+    請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+    並將結果以 JSON 格式輸出，請依照以下格式輸出：
     {{'exhibitions': [
         {{
             "name": "展覽名稱",
@@ -55,17 +60,46 @@ prompt=f"""
             "location": "展覽地點",
             "url": "展覽網址"
         }},
-        ...
-    ]}}
-
-    HTML：
-    {soup}
+        ...],'back': '上一頁連結',
+        'next': '下一頁連結'}}
     """
 
 result=promt_to_json(prompt)
+print(result['next'])
+result1=result['exhibitions']
+while result['next']!='':
+    next_page=result['next']
+    chrome.get(next_page)
+    html=chrome.page_source
+    soup=BeautifulSoup(html,'lxml')
+    prompt_next=f"""
+    {soup}是展覽網站的HTML，請提取以下資訊：
+    1. 展覽名稱
+    2. 展覽日期
+    3. 展覽地點
+    4. 展覽網址
+
+    如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。請去除所有分號';'，
+    請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+    並將結果以 JSON 格式輸出，請依照以下格式輸出：
+    {{'exhibitions': [
+        {{
+            "name": "展覽名稱",
+            "date": "展覽日期",
+            "location": "展覽地點",
+            "url": "展覽網址"
+        }},
+        ...],'back': '上一頁連結',
+        'next': '下一頁連結'}}
+    """
+    result=promt_to_json(prompt_next)
+    print(result['back'],result['next'])
+    result1.extend(result['exhibitions'])
+
+result1={'exhibitions':result1}
 
 prompt1=f"""
-    {result}
+    {result1}
     請你為此json檔中的所有url相似度做評分，0為完全不相似，1為完全相似，
     並將評分結果以json格式輸出，請依照以下格式輸出：
     {{
@@ -83,12 +117,12 @@ prompt1=f"""
         "http://ohstudy.net",...]時的相似度大約為0.05
     """
 r=promt_to_json(prompt1)
-print(r)
+# print(r)
 score=float(r['score'])
 print(f'相似度評分為{score}')
 if score>0.75:
     print('爬找第二層')
-    exhibitions=result['exhibitions']
+    exhibitions=result1['exhibitions']
     data=[]
     for exhibition in exhibitions:
         name=exhibition['name']
@@ -105,7 +139,7 @@ if score>0.75:
         data.append([promt_to_json(prompt2)])
 
     prompt3=f"""
-        將{result}更新url為{data}，但格式依然與原本相同，
+        將{result1}更新url為{data}，但格式依然與原本相同，
         並將結果以json格式輸出，例如：
         {{'exhibitions': [
             {{
@@ -117,22 +151,9 @@ if score>0.75:
             ...
         ]}}
         """
-    result=promt_to_json(prompt3)
+    result1=promt_to_json(prompt3)
 
-
-# with open("exhibitions.csv", mode='w', newline='', encoding='utf-8') as file:
-#     writer = csv.DictWriter(file, fieldnames=['name', 'date', 'location', 'url'])
-#     # 寫入表頭
-#     writer.writeheader()
-#     # 寫入每個展覽的資料
-#     writer.writerows(result['exhibitions'])
-
-# end_total_time=time.time()
-# total_time=end_total_time-start_total_time
-# print(f'全部執行完畢，總共花費{round(total_time)}秒')
-# print(result)
-
-for exhibition in result['exhibitions']:
+for exhibition in result1['exhibitions']:
     name=exhibition['name']
     date=exhibition['date']
     location=exhibition['location']
