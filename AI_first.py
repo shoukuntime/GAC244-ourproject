@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 import time
 import random
 from AI_second import AI_second
+import re
 
 start_total_time=time.time()
 # Config Parser
@@ -16,7 +17,7 @@ config.read('config.ini')
 # 設定 Google Generative AI
 api_keys = config.get('Google', 'GEMINI_API_KEY').replace('\n', '').split(',')
 
-url='https://www.chanchao.com.tw/expo.asp?t=C&country=TW'
+url='https://www.kje.com.tw/exhibition/index.php?spec=all'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
 service=Service(path)
 chrome_options = Options()
@@ -31,17 +32,24 @@ soup=BeautifulSoup(html,'lxml')
 def promt_to_json(prompt):
     try:
         genai.configure(api_key=random.choice(api_keys))
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash',
+        generation_config={
+            "temperature": 0,
+            "top_p": 0.01,
+            "top_k": 1,
+    },)
         response = model.generate_content(prompt, generation_config=genai.GenerationConfig(
                 response_mime_type="application/json",
             ))
+        result = response._result.candidates[0].content.parts[0].text
+        result=re.sub(r'[\x00-\x1F\x7F]', '', result.replace('\n', '\\n').replace('\r', '\\r'))
+        result=json.loads(result)
+        return result
     except Exception as e:
         print(e,'等待十秒')
         time.sleep(10)
         return promt_to_json(prompt)
-    result = response._result.candidates[0].content.parts[0].text
-    result=json.loads(result)
-    return result
+    
 
 prompt=f"""
     {soup}是展覽網站的HTML，請提取以下資訊：
@@ -153,10 +161,16 @@ if score>0.75:
         """
     result1=promt_to_json(prompt3)
 
+# 關閉瀏覽器
+chrome.quit()
+
 for exhibition in result1['exhibitions']:
-    name=exhibition['name']
+    title=exhibition['name']
     date=exhibition['date']
     location=exhibition['location']
     url=exhibition['url']
-    AI_second(name,date,location,url)
+    AI_second(title,date,location,url)
+
+end_total_time=time.time()
+print(f'AI_first總共花費{round(end_total_time-start_total_time)}秒')
     

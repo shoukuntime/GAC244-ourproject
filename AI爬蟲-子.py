@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 import csv
 import time
 import random
+import re
 
 start_total_time=time.time()
 # Config Parser
@@ -17,7 +18,7 @@ config.read('config.ini')
 # 設定 Google Generative AI
 api_keys = config.get('Google', 'GEMINI_API_KEY').replace('\n', '').split(',')
 
-url='https://www.chanchao.com.tw/petsshow/kaohsiungARENA/'
+url='https://www.touchtaiwan.com/'
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
 service=Service(path)
 chrome_options = Options()
@@ -32,17 +33,23 @@ soup=BeautifulSoup(html,'lxml')
 def promt_to_json(prompt):
     try:
         genai.configure(api_key=random.choice(api_keys))
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash',
+            generation_config={
+                "temperature": 0,
+                "top_p": 0.01,
+                "top_k": 1,
+            },)
         response = model.generate_content(prompt, generation_config=genai.GenerationConfig(
                 response_mime_type="application/json",
             ))
+        result = response._result.candidates[0].content.parts[0].text
+        result=re.sub(r'[\x00-\x1F\x7F]', '', result.replace('\n', '\\n').replace('\r', '\\r'))
+        result=json.loads(result)
+        return result
     except Exception as e:
         print(e,'等待十秒')
         time.sleep(10)
         return promt_to_json(prompt)
-    result = response._result.candidates[0].content.parts[0].text
-    result=json.loads(result)
-    return result
 
 prompt=f"""
     以下是展覽網站的HTML{soup}，請提取以下資訊的連結(若是相對網址請加上{url})，若都沒有請回傳空字串：
@@ -146,19 +153,22 @@ if result['companys']!='':
         print('爬找第二層')
         new_result1=[]
         for company in result1:
-            name=company['name']
-            link=company['url']
-            chrome.get(link)
-            html=chrome.page_source
-            soup=BeautifulSoup(html,'lxml')
-            prompt2=f"""
-            {soup}是展覽網站的HTML，網站名稱為{name}，請找到官網連結(請不要選擇與{url}過於相似的網站，優先選擇關鍵字'官方網站'相關連結)，
-            若無連結請回傳空字串，將結果以json格式輸出，例如：
-            {{'name': '2024 桃園聖誕婚禮市集 11/30-12/01',
-            'url': 'https://www.kje.com.tw/exhibition/ins.php?index_id=236'}}
-            """
-            new_link=promt_to_json(prompt2)['url']
-            new_result1.append({'name':name,'id':company['id'],'type':company['type'],'info':company['info'],'url':new_link})
+            try:
+                name=company['name']
+                link=company['url']
+                chrome.get(link)
+                html=chrome.page_source
+                soup=BeautifulSoup(html,'lxml')
+                prompt2=f"""
+                {soup}是展覽網站的HTML，網站名稱為{name}，請找到官網連結(請不要選擇與{url}過於相似的網站，優先選擇關鍵字'官方網站'相關連結)，
+                若無連結請回傳空字串，將結果以json格式輸出，例如：
+                {{'name': '2024 桃園聖誕婚禮市集 11/30-12/01',
+                'url': 'https://www.kje.com.tw/exhibition/ins.php?index_id=236'}}
+                """
+                new_link=promt_to_json(prompt2)['url']
+                new_result1.append({'name':name,'id':company['id'],'type':company['type'],'info':company['info'],'url':new_link})
+            except:
+                new_result1.append(company)
         result1=new_result1
 
 else:
@@ -199,6 +209,8 @@ end_total_time=time.time()
 total_time=end_total_time-start_total_time
 print(f'全部執行完畢，總共花費{round(total_time)}秒')
 result={'companys':result1,'map':[result2['map'],result['map']]}
+# 關閉瀏覽器
+chrome.quit()
 
 #將結果寫入json
 with open('result.json','w',encoding='utf-8') as f:
@@ -206,7 +218,7 @@ with open('result.json','w',encoding='utf-8') as f:
 
 result_map=result['companys']
 with open("companys.csv", mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.DictWriter(file, fieldnames=['name', 'id', 'type', 'info', 'url'])
+    writer = csv.DictWriter(file, fieldnames=['name', 'id','logo', 'type', 'info', 'url'])
     # 寫入表頭
     writer.writeheader()
     # 寫入每個展覽的資料

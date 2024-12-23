@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 import csv
 import time
 import random
+import re
 
 start_total_time=time.time()
 # Config Parser
@@ -31,17 +32,24 @@ soup=BeautifulSoup(html,'lxml')
 def promt_to_json(prompt):
     try:
         genai.configure(api_key=random.choice(api_keys))
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash',
+            generation_config={
+                "temperature": 0,
+                "top_p": 0.01,
+                "top_k": 1,
+            },)
         response = model.generate_content(prompt, generation_config=genai.GenerationConfig(
                 response_mime_type="application/json",
             ))
+        result = response._result.candidates[0].content.parts[0].text
+        result=re.sub(r'[\x00-\x1F\x7F]', '', result.replace('\n', '\\n').replace('\r', '\\r'))
+        result=json.loads(result)
+        return result
     except Exception as e:
         print(e,'等待十秒')
         time.sleep(10)
         return promt_to_json(prompt)
-    result = response._result.candidates[0].content.parts[0].text
-    result=json.loads(result)
-    return result
+    
 
 prompt=f"""
     {soup}是展覽網站的HTML，請提取以下資訊：
@@ -152,7 +160,8 @@ if score>0.75:
         ]}}
         """
     result1=promt_to_json(prompt3)
-
+# 關閉瀏覽器
+chrome.quit()
 
 with open("exhibitions.csv", mode='w', newline='', encoding='utf-8') as file:
     writer = csv.DictWriter(file, fieldnames=['name', 'date', 'location', 'url'])
