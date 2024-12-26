@@ -29,26 +29,39 @@ def AI_second(title,date,location,url):
     html=chrome.page_source
     soup=BeautifulSoup(html,'lxml')
 
-    def promt_to_json(prompt):
+    def prompt_to_json(prompt):
         try:
             genai.configure(api_key=random.choice(api_keys))
             model = genai.GenerativeModel('gemini-1.5-flash',
-            generation_config={
+                generation_config={
                 "temperature": 0,
                 "top_p": 0.01,
                 "top_k": 1,
-        },)
+                "max_output_tokens": 8192,  # 設定輸出的最大字元數
+                "response_mime_type":"application/json"
+                })
             response = model.generate_content(prompt, generation_config=genai.GenerationConfig(
                     response_mime_type="application/json",
                 ))
             result = response._result.candidates[0].content.parts[0].text
-            result=re.sub(r'[\x00-\x1F\x7F]', '', result.replace('\n', '\\n').replace('\r', '\\r'))
-            result=json.loads(result)
+            history=[{"role": "user",
+                    "parts": [prompt]},
+                    {"role": "model",
+                    "parts": [result]}]
+            token_count=response._result.usage_metadata.candidates_token_count
+            while token_count==8192:
+                chat_session = model.start_chat(history=history)
+                response = chat_session.send_message("請接續輸出，不要擅自把開頭改成雙引號")
+                history.append({"role": "model","parts": [response._result.candidates[0].content.parts[0].text]})
+                token_count=response._result.usage_metadata.candidates_token_count
+                print(token_count)
+                result+=response.text
+            result=json.loads(re.sub(r'[\x00-\x1F\x7F]', '', result.replace('\n', '\\n').replace('\r', '\\r'))) or json.loads(result)
             return result
         except Exception as e:
             print(e,'等待十秒')
             time.sleep(10)
-            return promt_to_json(prompt)
+            return prompt_to_json(prompt)
         
 
     prompt=f"""
@@ -64,7 +77,7 @@ def AI_second(title,date,location,url):
         {soup}
         """
 
-    result=promt_to_json(prompt)
+    result=prompt_to_json(prompt)
     print(result)
     if result['companys']!='':
         #抓取廠商列表
@@ -75,18 +88,18 @@ def AI_second(title,date,location,url):
         print('抓取廠商列表')
         prompt1=f"""
             {soup}
-            是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+            是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片網址(若是相對網址請加上{url})、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
             請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
             並將結果以json格式輸出，請以以下格式輸出：
             {{'companys': [
             {{'name': '廠商名稱',
-            'logo': '廠商logo',
+            'logo': '廠商logo圖片網址',
             'id': '攤位號碼',
             'type': '廠商類別',
             'info': '基本資訊',
             'url': '廠商官方連結'}},
             {{'name': '廠商名稱',
-            'logo': '廠商logo',
+            'logo': '廠商logo圖片網址',
             'id': '攤位號碼',
             'type': '廠商類別',
             'info': '基本資訊',
@@ -95,7 +108,7 @@ def AI_second(title,date,location,url):
             ],'back': '上一頁連結',
             'next': '下一頁連結'}}
             """
-        r=promt_to_json(prompt1)
+        r=prompt_to_json(prompt1)
         print(r['next'])
         result1=r['companys']
         while r['next']!='':
@@ -105,18 +118,18 @@ def AI_second(title,date,location,url):
             soup=BeautifulSoup(html,'lxml')
             prompt1=f"""
             {soup}
-            是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+            是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片網址(若是相對網址請加上{url})、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
             請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
             並將結果以json格式輸出，請以以下格式輸出：
             {{'companys': [
             {{'name': '廠商名稱',
-            'logo': '廠商logo',
+            'logo': '廠商logo圖片網址',
             'id': '攤位號碼',
             'type': '廠商類別',
             'info': '基本資訊',
             'url': '廠商官方連結'}},
             {{'name': '廠商名稱',
-            'logo': '廠商logo',
+            'logo': '廠商logo圖片網址',
             'id': '攤位號碼',
             'type': '廠商類別',
             'info': '基本資訊',
@@ -125,7 +138,7 @@ def AI_second(title,date,location,url):
             ],'back': '上一頁連結',
             'next': '下一頁連結'}}
             """
-            r=promt_to_json(prompt1)
+            r=prompt_to_json(prompt1)
             print(r['next'])
             result1.extend(r['companys'])
         prompt2=f"""
@@ -146,7 +159,7 @@ def AI_second(title,date,location,url):
             "http://www.energytaiwan.com.tw",
             "http://ohstudy.net",...]時的相似度大約為0.05
         """
-        r=promt_to_json(prompt2)
+        r=prompt_to_json(prompt2)
         score=float(r['score'])
         print(f'相似度評分為{score}')
         if score>0.75:
@@ -165,10 +178,10 @@ def AI_second(title,date,location,url):
                     {{'name': '2024 桃園聖誕婚禮市集 11/30-12/01',
                     'url': 'https://www.kje.com.tw/exhibition/ins.php?index_id=236'}}
                     """
-                    new_link=promt_to_json(prompt2)['url']
-                    new_result1.append({'name':name,'id':company['id'],'type':company['type'],'info':company['info'],'url':new_link})
+                    new_link=prompt_to_json(prompt2)['url']
+                    new_result1.append({'name':name,'logo':company['logo'],'id':company['id'],'type':company['type'],'info':company['info'],'url':new_link})    
                 except:
-                    new_result1.append({'name':name,'id':company['id'],'type':company['type'],'info':company['info'],'url':''})
+                    new_result1.append({'name':name,'logo':company['logo'],'id':company['id'],'type':company['type'],'info':company['info'],'url':''})
             result1=new_result1
 
     else:
@@ -181,7 +194,7 @@ def AI_second(title,date,location,url):
             若是請回傳'T'，若不是請回傳'F'，並將結果以json格式輸出，例如：
             {{'result': 'T'}}
             """
-        test=promt_to_json(prompt_test)['result']
+        test=prompt_to_json(prompt_test)['result']
         print(test)
         print(result['map'])
         if test=='F':
@@ -197,7 +210,7 @@ def AI_second(title,date,location,url):
                 {{'map': '展覽平面圖連結'}}
                 """
             try:
-                result2=promt_to_json(prompt2)
+                result2=prompt_to_json(prompt2)
             except:
                 result2={'map':''}
         else:
@@ -217,8 +230,8 @@ def AI_second(title,date,location,url):
     client = MongoClient("mongodb://localhost:27017/")
     db = client['myDatabase']
     collection = db[title]
-
-    collection.insert_many([r for r in result1])
+    if len(result1)>=2:
+        collection.insert_many([r for r in result1])
 
     # 關閉瀏覽器
     chrome.quit()

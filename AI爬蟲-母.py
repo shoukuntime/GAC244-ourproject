@@ -17,7 +17,7 @@ config.read('config.ini')
 # 設定 Google Generative AI
 api_keys = config.get('Google', 'GEMINI_API_KEY').replace('\n', '').split(',')
 
-url='https://www.chanchao.com.tw/expo.asp?t=C&country=TW'
+url=input('請輸入展覽集網址：')
 path=r'chromedriver-win64\chromedriver.exe' #chromedriver的位置
 service=Service(path)
 chrome_options = Options()
@@ -29,26 +29,39 @@ chrome.get(url)
 html=chrome.page_source
 soup=BeautifulSoup(html,'lxml')
 
-def promt_to_json(prompt):
+def prompt_to_json(prompt):
     try:
         genai.configure(api_key=random.choice(api_keys))
         model = genai.GenerativeModel('gemini-1.5-flash',
             generation_config={
-                "temperature": 0,
-                "top_p": 0.01,
-                "top_k": 1,
-            },)
+            "temperature": 0,
+            "top_p": 0.01,
+            "top_k": 1,
+            "max_output_tokens": 8192,  # 設定輸出的最大字元數
+            "response_mime_type":"application/json"
+            })
         response = model.generate_content(prompt, generation_config=genai.GenerationConfig(
                 response_mime_type="application/json",
             ))
         result = response._result.candidates[0].content.parts[0].text
-        result=re.sub(r'[\x00-\x1F\x7F]', '', result.replace('\n', '\\n').replace('\r', '\\r'))
-        result=json.loads(result)
+        history=[{"role": "user",
+                "parts": [prompt]},
+                {"role": "model",
+                "parts": [result]}]
+        token_count=response._result.usage_metadata.candidates_token_count
+        while token_count==8192:
+            chat_session = model.start_chat(history=history)
+            response = chat_session.send_message("請接續輸出")
+            history.append({"role": "model","parts": [response._result.candidates[0].content.parts[0].text]})
+            token_count=response._result.usage_metadata.candidates_token_count
+            print(token_count)
+            result+=response.text
+        result=json.loads(re.sub(r'[\x00-\x1F\x7F]', '', result.replace('\n', '\\n').replace('\r', '\\r'))) or json.loads(result)
         return result
     except Exception as e:
         print(e,'等待十秒')
         time.sleep(10)
-        return promt_to_json(prompt)
+        return prompt_to_json(prompt)
     
 
 prompt=f"""
@@ -72,7 +85,7 @@ prompt=f"""
         'next': '下一頁連結'}}
     """
 
-result=promt_to_json(prompt)
+result=prompt_to_json(prompt)
 print(result['next'])
 result1=result['exhibitions']
 while result['next']!='':
@@ -100,7 +113,7 @@ while result['next']!='':
         ...],'back': '上一頁連結',
         'next': '下一頁連結'}}
     """
-    result=promt_to_json(prompt_next)
+    result=prompt_to_json(prompt_next)
     print(result['back'],result['next'])
     result1.extend(result['exhibitions'])
 
@@ -124,7 +137,7 @@ prompt1=f"""
         "http://www.energytaiwan.com.tw",
         "http://ohstudy.net",...]時的相似度大約為0.05
     """
-r=promt_to_json(prompt1)
+r=prompt_to_json(prompt1)
 # print(r)
 score=float(r['score'])
 print(f'相似度評分為{score}')
@@ -144,7 +157,7 @@ if score>0.75:
         {{'name': '2024 桃園聖誕婚禮市集 11/30-12/01',
         'url': 'https://www.kje.com.tw/exhibition/ins.php?index_id=236'}}
         """
-        data.append([promt_to_json(prompt2)])
+        data.append([prompt_to_json(prompt2)])
 
     prompt3=f"""
         將{result1}更新url為{data}，但格式依然與原本相同，
@@ -159,7 +172,7 @@ if score>0.75:
             ...
         ]}}
         """
-    result1=promt_to_json(prompt3)
+    result1=prompt_to_json(prompt3)
 # 關閉瀏覽器
 chrome.quit()
 
