@@ -67,9 +67,10 @@ def prompt_to_json(prompt):
 prompt=f"""
     {soup}是展覽網站的HTML，請提取以下資訊：
     1. 展覽名稱
-    2. 展覽日期
-    3. 展覽地點
-    4. 展覽網址
+    2. 展覽logo圖片網址
+    3. 展覽日期
+    4. 展覽地點
+    5. 展覽網址
 
     如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。請去除所有分號';'，
     請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
@@ -96,9 +97,10 @@ while result['next']!='':
     prompt_next=f"""
     {soup}是展覽網站的HTML，請提取以下資訊：
     1. 展覽名稱
-    2. 展覽日期
-    3. 展覽地點
-    4. 展覽網址
+    2. 展覽logo圖片網址
+    3. 展覽日期
+    4. 展覽地點
+    5. 展覽網址
 
     如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。請去除所有分號';'，
     請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
@@ -106,6 +108,7 @@ while result['next']!='':
     {{'exhibitions': [
         {{
             "name": "展覽名稱",
+            "logo": "展覽logo圖片網址",
             "date": "展覽日期",
             "location": "展覽地點",
             "url": "展覽網址"
@@ -165,6 +168,7 @@ if score>0.75:
         {{'exhibitions': [
             {{
                 "name": "展覽名稱",
+                "logo": "展覽logo圖片網址",
                 "date": "展覽日期",
                 "location": "展覽地點",
                 "url": "展覽網址"
@@ -177,7 +181,7 @@ if score>0.75:
 # 關閉瀏覽器
 chrome.quit()
 
-for exhibition in result1['exhibitions'][14:]:
+for exhibition in result1['exhibitions']:
     title=exhibition['name']
     date=exhibition['date']
     location=exhibition['location']
