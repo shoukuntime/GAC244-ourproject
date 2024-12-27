@@ -10,6 +10,22 @@ import random
 from AI_second import AI_second
 import re
 
+exhibition_type = {
+    "Art Exhibition": "藝術展",
+    "Anime Exhibition": "動漫展",
+    "Book Exhibition": "書展",
+    "Car Exhibition": "車展",
+    "Technology Exhibition": "科技展",
+    "Cultural and Creative Exhibition": "文創展",
+    "Furniture Exhibition": "家具展",
+    "Food Exhibition": "食品展",
+    "Pet Exhibition": "寵物展",
+    "Wedding Exhibition": "婚紗展",
+    "Travel Exhibition": "旅遊展",
+    "Design Exhibition": "設計展",
+    "Other": "其他"
+}
+
 start_total_time=time.time()
 # Config Parser
 config = configparser.ConfigParser()
@@ -71,6 +87,7 @@ prompt=f"""
     3. 展覽日期
     4. 展覽地點
     5. 展覽網址
+    6. 展覽類型(請從以下類型選擇其中一個{exhibition_type}(用英文))
 
     如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。請去除所有分號';'，
     請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
@@ -78,9 +95,11 @@ prompt=f"""
     {{'exhibitions': [
         {{
             "name": "展覽名稱",
+            "logo": "展覽logo圖片網址",
             "date": "展覽日期",
             "location": "展覽地點",
             "url": "展覽網址"
+            "type": "展覽類型"
         }},
         ...],'back': '上一頁連結',
         'next': '下一頁連結'}}
@@ -101,6 +120,7 @@ while result['next']!='':
     3. 展覽日期
     4. 展覽地點
     5. 展覽網址
+    6. 展覽類型(請從以下類型選擇其中一個{exhibition_type}(用英文))
 
     如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。請去除所有分號';'，
     請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
@@ -112,6 +132,7 @@ while result['next']!='':
             "date": "展覽日期",
             "location": "展覽地點",
             "url": "展覽網址"
+            "type": "展覽類型"
         }},
         ...],'back': '上一頁連結',
         'next': '下一頁連結'}}
@@ -172,6 +193,7 @@ if score>0.75:
                 "date": "展覽日期",
                 "location": "展覽地點",
                 "url": "展覽網址"
+                "type": "展覽類型"
             }},
             ...
         ]}}
@@ -183,10 +205,12 @@ chrome.quit()
 
 for exhibition in result1['exhibitions']:
     title=exhibition['name']
+    logo=exhibition['logo']
     date=exhibition['date']
     location=exhibition['location']
     url=exhibition['url']
-    AI_second(title,date,location,url)
+    type=exhibition['type']
+    AI_second(title,logo,date,location,url,type)
 
 end_total_time=time.time()
 print(f'AI_first總共花費{round(end_total_time-start_total_time)}秒')
