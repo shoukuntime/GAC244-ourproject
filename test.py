@@ -36,7 +36,7 @@ def recommend_items(user, user_exhibition_matrix, exhibition_similarity_df, top_
     return recommendations
 
 # 測試推薦函數
-user_to_recommend = "Alice"
+user_to_recommend = "Bob"
 recommendations = recommend_items(user_to_recommend, user_exhibition_matrix, exhibition_similarity_df)
 
 print(f"\nRecommendations for {user_to_recommend}:")
