@@ -1,8 +1,5 @@
 # 鎮均的程式
 
-### app.py
-從人豪的程式改，可將單一子展覽存成csv
-
 ### 展昭爬蟲.py
 針對展昭的所有展覽，將詳細資料存成csv
 
@@ -20,3 +17,15 @@ AI爬蟲-母的延伸，存入MongoDB
 
 ### AI_second.py
 AI爬蟲-子的延伸，存入MongoDB
+
+### clear_database.py
+將database資料清除
+
+### export_database.py
+將database資料所有collection存成json
+
+### click.py
+依照使用者點擊多少次展覽來進行協同演算的測試檔
+
+### myfavorite.py
+依照使用者設定我的最愛來進行協同演算的測試檔(1:表示加入最愛，0:未加入最愛，-1:系統推薦且不喜歡)
