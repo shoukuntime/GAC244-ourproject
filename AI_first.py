@@ -9,6 +9,8 @@ import time
 import random
 from AI_second import AI_second
 import re
+from pymongo import MongoClient
+client = MongoClient("mongodb://localhost:27017/")
 
 exhibition_type = {
     "Art Exhibition": "藝術展",
@@ -76,6 +78,7 @@ def prompt_to_json(prompt):
         return result
     except Exception as e:
         print(e,'等待十秒')
+        print(result[16500:])
         time.sleep(10)
         return prompt_to_json(prompt)
     
@@ -203,7 +206,7 @@ if score>0.75:
 # 關閉瀏覽器
 chrome.quit()
 
-for exhibition in result1['exhibitions']:
+for exhibition in result1['exhibitions'][-3:]:
     title=exhibition['name']
     logo=exhibition['logo']
     date=exhibition['date']

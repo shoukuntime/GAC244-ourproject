@@ -9,7 +9,7 @@ import time
 import random
 import re
 
-def AI_second(title,date,location,url):
+def AI_second(title,logo,date,location,url,type):
     start_total_time=time.time()
     # Config Parser
     config = configparser.ConfigParser()
@@ -225,10 +225,13 @@ def AI_second(title,date,location,url):
 
     #將結果寫入json
     from pymongo import MongoClient
-
-    # 连接到 MongoDB
     client = MongoClient("mongodb://localhost:27017/")
-    db = client['myDatabase']
+
+    db=client['exhibitionDatabase']
+    collection=db[type]
+    collection.insert_one({'title':title,'logo':logo,'date':date,'location':location,'url':url,'map':result['map']})
+
+    db = client['companyDatabase']
     collection = db[title]
     if len(result1)>=2:
         collection.insert_many([r for r in result1])
