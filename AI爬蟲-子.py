@@ -52,30 +52,30 @@ def prompt_to_json(prompt):
         token_count=response._result.usage_metadata.candidates_token_count
         while token_count==8192:
             chat_session = model.start_chat(history=history)
-            response = chat_session.send_message("請接續輸出，不要擅自把開頭改成雙引號")
+            response = chat_session.send_message("請完全接續上次輸出的內容，不要擅自把開頭改成雙引號")
             history.append({"role": "model","parts": [response._result.candidates[0].content.parts[0].text]})
             token_count=response._result.usage_metadata.candidates_token_count
+            # print(response.text[:100]+'...'+response.text[-100:])
             print(token_count)
             result+=response.text
         result=json.loads(re.sub(r'[\x00-\x1F\x7F]', '', result.replace('\n', '\\n').replace('\r', '\\r'))) or json.loads(result)
         return result
     except Exception as e:
         print(e,'等待十秒')
-        print(result[5100:5200])
         time.sleep(10)
         return prompt_to_json(prompt)
-
+print(url)
 prompt=f"""
-    以下是展覽網站的HTML{soup}，請提取以下資訊的連結(若是相對網址請加上{url})，若都沒有請回傳空字串：
+    以下是展覽網站的HTML{soup}，請提取以下資訊的連結(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)，若沒有請回傳空字串：
     1. 參展的廠商列表(參展品牌/參展商列表)
     2. 展覽平面圖(非google地圖)(若連結有'map'優先選擇)
+    3. 展覽說明、介紹、詳情(此部分不要回傳連結，只需回傳文字，請你用自己的方式說明此展覽)
 
     請去除所有分號';'，並將結果以 JSON 格式輸出，例如：
     {{'companys': '參展廠商列表連結',
-    'map': '展覽平面圖連結'}}
+    'map': '展覽平面圖連結',
+    'info': '展覽說明、介紹、詳情'}}
 
-    HTML：
-    {soup}
     """
 
 result=prompt_to_json(prompt)
@@ -89,8 +89,8 @@ if result['companys']!='':
     print('抓取廠商列表')
     prompt1=f"""
         {soup}
-        是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片網址(若是相對網址請加上{url})、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
-        請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+        是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片網址(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)，若沒有請回傳空字串，
+        請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)，若沒有請回傳空字串，
         並將結果以json格式輸出，請以以下格式輸出：
         {{'companys': [
         {{'name': '廠商名稱',
@@ -120,8 +120,8 @@ if result['companys']!='':
         soup=BeautifulSoup(html,'lxml')
         prompt1=f"""
         {soup}
-        是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片網址(若是相對網址請加上{url})、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url})，若沒有請回傳空字串，
-        請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+        是廠商列表的HTML，請找到各個廠商名稱、廠商logo圖片網址(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)、攤位號碼、廠商類別、基本資訊(排除其他資訊)、廠商官方連結(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)，若沒有請回傳空字串，
+        請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)，若沒有請回傳空字串，
         並將結果以json格式輸出，請以以下格式輸出：
         {{'companys': [
         {{'name': '廠商名稱',
@@ -146,7 +146,7 @@ if result['companys']!='':
     prompt2=f"""
     {result1}
     請你為此json檔中的所有url相似度做評分，0為完全不相似，1為完全相似，
-    並將評分結果以json格式輸出，請依照以下格式輸出：
+    並將評分結果以json格式輸出，請依照以下格式輸出，並只要輸出一個數字就好：
     {{
         "score": 0.9
     }}
@@ -176,7 +176,7 @@ if result['companys']!='':
                 html=chrome.page_source
                 soup=BeautifulSoup(html,'lxml')
                 prompt2=f"""
-                {soup}是展覽網站的HTML，網站名稱為{name}，請找到官網連結(請不要選擇與{url}過於相似的網站，優先選擇關鍵字'官方網站'相關連結)，
+                {soup}是展覽網站的HTML，網站名稱為{name}，請找到官網連結(請不要選擇與{url}過於相似的網站，優先選擇關鍵字'官方網站'或'公司網址'相關連結)，
                 若無連結請回傳空字串，將結果以json格式輸出，例如：
                 {{'name': '2024 桃園聖誕婚禮市集 11/30-12/01',
                 'url': 'https://www.kje.com.tw/exhibition/ins.php?index_id=236'}}
@@ -224,7 +224,7 @@ else:
 end_total_time=time.time()
 total_time=end_total_time-start_total_time
 print(f'全部執行完畢，總共花費{round(total_time)}秒')
-result={'companys':result1,'map':[result2['map'],result['map']]}
+result={'companys':result1,'map':[result2['map'],result['map']], 'info':result['info']}
 # 關閉瀏覽器
 chrome.quit()
 
@@ -233,9 +233,10 @@ with open('result.json','w',encoding='utf-8') as f:
     json.dump(result,f,ensure_ascii=False,indent=4)
 
 result_map=result['companys']
-with open("companys.csv", mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.DictWriter(file, fieldnames=['name', 'id','logo', 'type', 'info', 'url'])
-    # 寫入表頭
-    writer.writeheader()
-    # 寫入每個展覽的資料
-    writer.writerows(result_map)
+if result_map!='':
+    with open("companys.csv", mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=['name', 'id','logo', 'type', 'info', 'url'])
+        # 寫入表頭
+        writer.writeheader()
+        # 寫入每個展覽的資料
+        writer.writerows(result_map)

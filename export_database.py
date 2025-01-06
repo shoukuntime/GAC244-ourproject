@@ -3,11 +3,11 @@ from bson.json_util import dumps
 import os
 
 # 配置
-DB_NAME = "myDatabase"
-OUTPUT_DIR = "./exports"
+DB_NAME = input("請輸入要匯出的資料庫名稱：")
+OUTPUT_DIR = "./exhibition"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb+srv://everybody:gac244@cluster0.mh9yw.mongodb.net/")
 db = client[DB_NAME]
 
 for collection_name in db.list_collection_names():

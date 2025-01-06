@@ -10,7 +10,7 @@ import random
 from AI_second import AI_second
 import re
 from pymongo import MongoClient
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb+srv://everybody:gac244@cluster0.mh9yw.mongodb.net/")
 
 exhibition_type = {
     "Art Exhibition": "藝術展",
@@ -69,7 +69,7 @@ def prompt_to_json(prompt):
         token_count=response._result.usage_metadata.candidates_token_count
         while token_count==8192:
             chat_session = model.start_chat(history=history)
-            response = chat_session.send_message("請接續輸出，不要擅自把開頭改成雙引號")
+            response = chat_session.send_message("請完全接續上次輸出的內容，不要擅自把開頭改成雙引號")
             history.append({"role": "model","parts": [response._result.candidates[0].content.parts[0].text]})
             token_count=response._result.usage_metadata.candidates_token_count
             print(token_count)
@@ -92,8 +92,8 @@ prompt=f"""
     5. 展覽網址
     6. 展覽類型(請從以下類型選擇其中一個{exhibition_type}(用英文))
 
-    如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。請去除所有分號';'，
-    請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+    如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)，若都沒有請回傳空字串。請去除所有分號';'，
+    請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)，若沒有請回傳空字串，
     並將結果以 JSON 格式輸出，請依照以下格式輸出：
     {{'exhibitions': [
         {{
@@ -111,8 +111,13 @@ prompt=f"""
 result=prompt_to_json(prompt)
 print(result['next'])
 result1=result['exhibitions']
+next_pages=[]
 while result['next']!='':
+
     next_page=result['next']
+    if next_page in next_pages:
+        break
+    next_pages.append(next_page)
     chrome.get(next_page)
     html=chrome.page_source
     soup=BeautifulSoup(html,'lxml')
@@ -125,8 +130,8 @@ while result['next']!='':
     5. 展覽網址
     6. 展覽類型(請從以下類型選擇其中一個{exhibition_type}(用英文))
 
-    如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url})，若都沒有請回傳空字串。請去除所有分號';'，
-    請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url})，若沒有請回傳空字串，
+    如果無法找到某項資訊，請用正確相關網址代替(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)，若都沒有請回傳空字串。請去除所有分號';'，
+    請找到關鍵字'上一頁'與'下一頁'的連結(若是相對網址請加上{url}，若有必要請刪減成最有可能的網址)，若沒有請回傳空字串，
     並將結果以 JSON 格式輸出，請依照以下格式輸出：
     {{'exhibitions': [
         {{
@@ -206,7 +211,7 @@ if score>0.75:
 # 關閉瀏覽器
 chrome.quit()
 
-for exhibition in result1['exhibitions'][-3:]:
+for exhibition in result1['exhibitions'][18:]:
     title=exhibition['name']
     logo=exhibition['logo']
     date=exhibition['date']
